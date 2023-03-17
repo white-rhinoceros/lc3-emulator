@@ -1,5 +1,9 @@
-// const THRESHOLD: i32 = 10;
+mod computer;
 
 fn main() {
-    println!("Hello, world!");
+    let mut cpu = computer::CPU::new();
+
+    cpu.tick();
+
+    println!("Hello, {}", cpu.reg_get_val(&computer::Registers::RegR0).unwrap());
 }
