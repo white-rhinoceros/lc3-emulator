@@ -1,56 +1,50 @@
-use std::collections::HashMap;
+use crate::computer::cpu::CPU;
+use crate::computer::memory::Memory;
 
-// Тип определяющий разрядность нашей архитектуры.
-type ArcBit = u16;
+mod cpu;
+mod memory;
 
-/// Регистры процессора.
-/// RegR0 - RegR7 регистры общего назначения.
-/// RegPC регистр счетчика команд (program counter, хранит адрес памяти, где находится следующая
-/// исполняемая инструкция).
-/// RegCond регистр флагов условий.
-#[derive(Eq, Hash, PartialEq)]
-pub enum Registers {
-    RegR0,
-    RegR1,
-    RegR2,
-    RegR3,
-    RegR4,
-    RegR5,
-    RegR6,
-    RegR7,
-    RegPC,
-    RegCond,
+/// Тип определяющий разрядность нашей архитектуры.
+type ArcBitDepth = u16;
+
+/// Тип определяющий разрядность шины адреса.
+type AddrBitDepth = u16;
+
+/// Константа, определяющая адрес начала программы в памяти. Константа инициализирует
+/// стартовую позицию регистра счетчика команд.
+const PC_START: AddrBitDepth = 0x3000;
+const MAX_ADD_BIT_DEPTH: AddrBitDepth = u16::MAX;
+
+pub struct Machine {
+    // Компьютер состоит из процессора, памяти.
+    memory: Memory,
+    cpu: CPU,
 }
 
-pub struct CPU {
-    registers: HashMap<Registers, ArcBit>
-}
+impl Machine {
+    //! Конструктор.
+    pub fn new(program: Vec<ArcBitDepth>) -> Machine {
 
-impl CPU {
-    pub fn new() -> CPU {
-        let mut registers = HashMap::new();
-        registers.insert(Registers::RegR0, 0);
-        registers.insert(Registers::RegR1, 0);
-        registers.insert(Registers::RegR2, 0);
-        registers.insert(Registers::RegR3, 0);
-        registers.insert(Registers::RegR4, 0);
-        registers.insert(Registers::RegR5, 0);
-        registers.insert(Registers::RegR6, 0);
-        registers.insert(Registers::RegR7, 0);
-        registers.insert(Registers::RegPC, 0);
-        registers.insert(Registers::RegCond, 0);
+        // Память принадлежит
+        let mut memory = Memory::new();
+        let mut cpu = CPU::new();
 
-        CPU { registers }
-    }
-
-    pub fn reg_get_val(&self, reg: &Registers) -> Option<&ArcBit> {
-        match self.registers.get(reg) {
-            None => None,
-            Some(val) => Some(val)
+        Machine {
+            memory,
+            cpu
         }
     }
 
+    /// Один тактовый импульс.
     pub fn tick(&mut self) {
-        // Пока ничего.
+        // Процессор должен реализовывать следующий интерфейс:
+        // Метод memory_request() определяющий что именно хочет сделать процессор, считать память или записать или ничего не делать. На каждом tick мы должны опросить процессор.
+        // Здесь проявляется интересная особенность: в реальных схемах процессор управляет компьютером, и
+        // уровень читать или писать переводит машину в необходимое состояние. Здесь же мы отходим от этого,
+        // и рассматриваем процессор как зависимое звено машины, машина спрашивает у процессора что ей делать.
+        // Метод address() - получает адрес в памяти, с которого нужно или считать информацию или записать информацию по этому адресу.
+        // Методы get_data() и set_data() считывающие информацию от процессора.
+        // Так мы сможем использовать различные "процессоры" в нашем компьютере.
+
     }
 }
